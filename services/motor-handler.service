@@ -1,0 +1,15 @@
+[Unit]
+Description=Motor Handler Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/robot/pke-starling-controllers/core_service_scripts/imu_handler.py
+Restart=always
+RestartSec=2
+User=root
+WorkingDirectory=/home/robot
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

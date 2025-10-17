@@ -8,3 +8,4 @@ pip install -e .
 pip install git+https://github.com/siddn/starling.git
 ```
 
+If you want to use the services files in systemd, you'll need to make sure the python executable is correct, the script directories are correct, and that there are no passwords required for sudo commands.

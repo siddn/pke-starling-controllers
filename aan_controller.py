@@ -1,6 +1,6 @@
 from starling import NexusSubscriber, NexusPublisher
 from scipy.interpolate import PchipInterpolator
-from states import IMUState, ActuatorState, ControllerState, GaitState
+from core_service_scripts.states import IMUState, ActuatorState, ControllerState, GaitState
 import time
 import msgspec
 
@@ -25,11 +25,29 @@ sub = NexusSubscriber()
 decoder = msgspec.json.Decoder()
 encoder = msgspec.json.Encoder()
 
+def update_settings(msg, topic):
+    msg = decoder.decode(msg)
+    controller_state.update(msg)
+    # global target_angle
+    if "stance_angle" in msg or "swing_angle" in msg:
+        st_angle = controller_state.stance_angle
+        sw_angle = controller_state.swing_angle
+        target_angle = PchipInterpolator(
+            [0, 15, 20, 65, 73, 90, 100],
+            [st_angle, st_angle, st_angle, st_angle, sw_angle, sw_angle, sw_angle]
+        )
+
+def calibrate_knee_angle(msg, topic):
+    msg = decoder.decode(msg)
+    baseline_knee_angle = controller_state.knee_angle # Use the current knee angle as the reference
+    calibration_offset = msg.get("calibration_offset", 0.0)
+    controller_state.update({"calibration_offset": baseline_knee_angle - calibration_offset})
+
 sub.subscribe("imus.thigh.state", lambda msg, topic: thigh_state.update(decoder.decode(msg)))
 sub.subscribe("imus.shank.state", lambda msg, topic: shank_state.update(decoder.decode(msg)))
 sub.subscribe("actuator.state", lambda msg, topic: motor_state.update(decoder.decode(msg)))
-sub.subscribe("calibration.knee_angle", lambda msg, topic: controller_state.update(decoder.decode(msg)))
-sub.subscribe("controller.settings", lambda msg, topic: controller_state.update(decoder.decode(msg)))
+sub.subscribe("calibration.knee_angle", calibrate_knee_angle)
+sub.subscribe("controller.settings", update_settings)
 sub.subscribe("gait.state", lambda msg, topic: gait_state.update(decoder.decode(msg)))
 
 pub = NexusPublisher()
@@ -68,4 +86,4 @@ while True:
         "actuator_state": motor_state.__dict__,
         "gait_state": gait_state.__dict__
     }))
-    time.sleep(1/230)
+    time.sleep(1.0)
