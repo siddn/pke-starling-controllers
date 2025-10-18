@@ -16,8 +16,8 @@ logger.addHandler(handler)
 
 OPERATION_FREQUENCY = 200
 
-LEFT = 1
-RIGHT = 2
+LEFT = 0x1
+RIGHT = 0x2
 
 PI = np.pi
 
@@ -42,7 +42,7 @@ while True:
 
     left_connected, right_connected = motors.is_connected(LEFT), motors.is_connected(RIGHT)
 
-    if (left_connected and right_connected):
+    if (left_connected and right_connected): # Both motors should not be connected at the same time
         motor_state.actuation_enabled = False
         connection_expected = True
         logger.error("BOTH MOTORS ARE CONNECTED: DISCONNECT ONE TO RESUME OPERATION")

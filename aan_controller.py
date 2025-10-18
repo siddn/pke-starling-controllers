@@ -3,6 +3,7 @@ from scipy.interpolate import PchipInterpolator
 from core_service_scripts.states import IMUState, ActuatorState, ControllerState, GaitState
 import time
 import msgspec
+from epicallypowerful.toolbox import TimedLoop
 
 STANCE = 0
 SWING = 1
@@ -28,7 +29,7 @@ encoder = msgspec.json.Encoder()
 def update_settings(msg, topic):
     msg = decoder.decode(msg)
     controller_state.update(msg)
-    # global target_angle
+    global target_angle
     if "stance_angle" in msg or "swing_angle" in msg:
         st_angle = controller_state.stance_angle
         sw_angle = controller_state.swing_angle
@@ -55,7 +56,9 @@ pub = NexusPublisher()
 knee_angle = 0.0
 error = 0.0
 
-while True:
+loop = TimedLoop(frequency=OPERATION_FREQUENCY)
+
+while loop.continue_loop():
     # itter_time = time.clock_gettime(clk_id=time.CLOCK_MONOTONIC)
     itter_time = time.perf_counter()
     target_angle_value = target_angle(gait_state.gait_phase).item()
@@ -86,4 +89,3 @@ while True:
         "actuator_state": motor_state.__dict__,
         "gait_state": gait_state.__dict__
     }))
-    time.sleep(1.0)

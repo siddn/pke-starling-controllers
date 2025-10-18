@@ -91,10 +91,10 @@ class ControllerState:
 
 @dataclass
 class GaitState:
-    gait_phase: float = 0.0
-    gait_state: int = 2 # IDLE = 2, STANCE = 0, SWING = 1
-    gait_idx: int = 0
-    mean_gait_duration: float = 1.0
+    gait_phase: float = 0.0 # Ranges from 0.0 to 1.0 (aka 0% to 100%). Continuous.
+    gait_state: int = -1 # IDLE = -1, STANCE = 1, SWING = 0. Discrete.
+    gait_idx: int = 0 # Counts the number of gait cycles completed. Discrete.
+    mean_gait_duration: float = 1.0 # The average duration of a full gait cycle in seconds. Continuous.
 
     def update(self, d: dict):
         self.__dict__.update(d)

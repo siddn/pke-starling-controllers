@@ -1,4 +1,4 @@
-from epicallypowerful import MicrostrainIMUs
+from epicallypowerful.sensing import MicrostrainImus
 from epicallypowerful.toolbox import TimedLoop
 from states import IMUState
 from starling import NexusPublisher, msgspec
@@ -25,12 +25,17 @@ imus = MicrostrainIMUs(imu_ids)
 imu_states = [IMUState() for _ in imu_ids]
 loop = TimedLoop(frequency)
 encoder = msgspec.json.Encoder()
+error_state = False
+
 
 while loop():
     try:
         imu_data = [imus.get_data(imu_id) for imu_id in imu_ids]
+        error_state = False
     except Exception as e:
-        logger.error(f"Error retrieving IMU data: {e}, check connections and cable integrity.")
+        if not error_state:
+            logger.error(f"Error retrieving IMU data: {e}, check connections and cable integrity.")
+            error_state = True
         continue
     for i, data in enumerate(imu_data):
         imu_states[i].update({
