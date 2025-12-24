@@ -4,15 +4,14 @@ import time
 from starling import NexusSubscriber, NexusPublisher, msgspec
 from states import ActuatorState, RMSTrack
 import numpy as np
-import logging
+import argparse
+from log_setup import setup_logging
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler()
-handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+parser = argparse.ArgumentParser(description="Motor Handler for CyberGear Actuators")
+parser.add_argument('--log-file', type=str, default=None, help='Path to log file')
+parser.add_argument('--log-level', type=str, default='DEBUG', help='Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)')
+args = parser.parse_args()
+logger = setup_logging(name=__name__, log_file=args.log_file, log_level=args.log_level)
 
 OPERATION_FREQUENCY = 200
 
